@@ -162,6 +162,18 @@ def run(configs, output):
                 e["base"] = a
                 break
 
+    #Process objective function coeficients to define the bounds of each one 
+    sign_relation = np.zeros(num_of_vars)
+    for r in new_config["restrictions"]:
+        if convertions.is_inferior_limit_restriction(r):
+            i = r["coeficients"].index(1)
+            if r["type"] == ">=":
+                sign_relation[i] = 1    #This coeficient must be >= 0
+            elif r["type"] == "<=":
+                sign_relation[i] = -1   #This coeficient must be <= 0
+            else:
+                sign_relation[i] = 0    #This coeficient can be anything
+
     #Start the loop process
     num_of_vars = len(result["variables"])
     k = 0 #Temp
@@ -191,11 +203,22 @@ def run(configs, output):
             #The intersection is a line or it doesn't exists
             print("Couldn't solve the problem.")
         
-        #Select in variable
-        (min_value, base_in_index) = min(current_iteration["z"]["coeficients"])
+        #Select the in variable
+        base_in_value, base_in_index = None
+        for i in range(0, num_of_vars):
+            real = current_iteration["z"]["coeficients"]["real"][i]
+            artf = current_iteration["z"]["coeficients"]["artificials"][i]
+            match sign_relation[i]:
+                case 1:
+                    break
+                case -1:
+                    break
+                case 0:
+                    break
+        #(base_in_value, base_in_index) = min(current_iteration["z"]["coeficients"])
         
         #Verify if it's optimum
-        if min_value["artificial"] > 0 or (min_value["artificial"] == 0 and min_value["real"] >= 0):
+        if base_in_value["artificial"] > 0 or (base_in_value["artificial"] == 0 and base_in_value["real"] >= 0):
             result["optimum_point"] = current_iteration["target_point"].tolist()
             result["optimum_value"] = current_iteration["z"]["value"]
             current_iteration["is_optimum"] = True
