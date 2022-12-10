@@ -86,8 +86,8 @@ def run(configs, output):
     result["variables"] = configs["variable_names"]
     
     for p in viable_region:
-        if not "value" in p:
-            p["value"] = "None"
+        if "value" not in p:
+            p["value"] = 0
         
         result["points"].append(
         {

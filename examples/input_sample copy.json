@@ -1,24 +1,29 @@
 {
     "integer_solution": false,
-    "method": "GRAPHIC",
+    "method": "TABULAR",
     "problem_type": "PRIMAL",
     "objective": "MAXIMIZE",
-    "objective_function": [3, 5],
+    "objective_function": [4, 5],
     "restrictions": [
         {
-            "coeficients": [1,0],
+            "coeficients": [6,4],
             "type": "<=",
-            "value": 4
+            "value": 24
         },
         {
-            "coeficients": [0,2],
+            "coeficients": [1,2],
             "type": "<=",
-            "value": 12
+            "value": 6
         },
         {
-            "coeficients": [3,2],
+            "coeficients": [-1,1],
             "type": "<=",
-            "value": 18
+            "value": 1
+        },
+        {
+            "coeficients": [0,1],
+            "type": "<=",
+            "value": 2
         },
         {
             "coeficients": [1,0],

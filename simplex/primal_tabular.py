@@ -126,6 +126,7 @@ def run(configs, output):
     current_iteration["z"]["coeficients"]["reals"] *= -1 if new_config["objective"] == "MAXIMIZE" else 1
     current_iteration["z"]["value"] = {"real": 0.0, "artificial": 0.0}
     current_iteration["base_variables"] = []
+    num_of_vars = len(result["variables"])
     
     i = 0
     for r in new_config["restrictions"]:
@@ -166,7 +167,7 @@ def run(configs, output):
     sign_relation = np.zeros(num_of_vars)
     for r in new_config["restrictions"]:
         if convertions.is_inferior_limit_restriction(r):
-            i = r["coeficients"].index(1)
+            i = r["coeficients"].tolist().index(1)
             if r["type"] == ">=":
                 sign_relation[i] = 1    #This coeficient must be >= 0
             elif r["type"] == "<=":
@@ -175,8 +176,8 @@ def run(configs, output):
                 sign_relation[i] = 0    #This coeficient can be anything
 
     #Start the loop process
-    num_of_vars = len(result["variables"])
     k = 0 #Temp
+    changed_variables = []
     while True and k < 10:
         k+=1
 
@@ -204,9 +205,10 @@ def run(configs, output):
             print("Couldn't solve the problem.")
         
         #Select the in variable
-        base_in_value, base_in_index = None
+        base_in_value = {}
+        base_in_index = {}
         for i in range(0, num_of_vars):
-            real = current_iteration["z"]["coeficients"]["real"][i]
+            real = current_iteration["z"]["coeficients"]["reals"][i]
             artf = current_iteration["z"]["coeficients"]["artificials"][i]
             match sign_relation[i]:
                 case 1:
@@ -215,7 +217,8 @@ def run(configs, output):
                     break
                 case 0:
                     break
-        #(base_in_value, base_in_index) = min(current_iteration["z"]["coeficients"])
+        
+        (base_in_value, base_in_index) = min(current_iteration["z"]["coeficients"])
         
         #Verify if it's optimum
         if base_in_value["artificial"] > 0 or (base_in_value["artificial"] == 0 and base_in_value["real"] >= 0):
@@ -234,10 +237,12 @@ def run(configs, output):
             e = current_iteration["expressions"][i]
             n = e["coeficients"][base_in_index]
             v = abs(e["value"] / n) if n != 0 else float("inf")
-            if(v <= min_v):
+            if(v <= min_v and not changed_variables.__contains__(e["base"])):
                 min_v = v
                 target_index = i
                 base_out = e["base"]
+
+        changed_variables.append(current_iteration["base_in"])
         current_iteration["base_out"] = base_out
         
         #Normalize pivo line
